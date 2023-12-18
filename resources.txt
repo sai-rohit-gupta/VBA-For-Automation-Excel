@@ -1,0 +1,3 @@
+VBA can be written anywhere and used in xlsx.
+https://stackoverflow.com/questions/23173694/is-it-possible-to-write-excel-vba-code-in-visual-studio
+
