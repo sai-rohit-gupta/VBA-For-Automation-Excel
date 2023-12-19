@@ -11,6 +11,9 @@ Sub TransferData()
     Dim lastRowSource As Long
     Dim lastRowDestination As Long
     Dim i As Long
+    Dim j As Long
+    Dim sourceResultColumn As Long
+    Dim DestinationResultColumn As Long
     Dim sourceWBName As String
     Dim DestinationWBName As String
 
@@ -19,8 +22,8 @@ Sub TransferData()
     Set devConstantsWs = ThisWorkbook.Sheets("Dev-Constants")
 
     ' Set the source & Destination workbook and worksheet
-    Set sourceWorkbook = Workbooks(devConstantsWs.Cells(2,2)) ' Change to the name of your source workbook
-    Set destinationWorkbook = Workbooks(devConstantsWs.Cells(3,2)) ' Change to the name of your destination workbook
+    Set sourceWorkbook = Workbooks(devConstantsWs.Cells(2, 2).Value) ' Change to the name of your source workbook
+    Set destinationWorkbook = Workbooks(devConstantsWs.Cells(3, 2).Value) ' Change to the name of your destination workbook
 
     ' Set the source worksheet
     Set sourceWorksheet = sourceWorkbook.Sheets("Parameter")
@@ -28,28 +31,29 @@ Sub TransferData()
     'Finding the Input Worksheet end row
     MappingInputRows = currentWs.Cells(currentWs.Rows.Count, "A").End(xlUp).Row
 
-    for i=2 to MappingInputRows
-        Set SourceColumnName = ThisWorkbook.Sheets("Parameter").Cells(i,2)
-        Set TargetSheetName = ThisWorkbook.Sheets("Parameter").Cells(i,4)
-        Set TargetColumnName = ThisWorkbook.Sheets("Parameter").Cells(i,5)
-        if Not IsEmpty(TargetSheetName.Value) and Not IsEmpty(TargetColumnName.Value) Then
+    For i = 2 To MappingInputRows
+        Set SourceColumnName = ThisWorkbook.Sheets("Parameter").Cells(i, 2)
+        Set TargetSheetName = ThisWorkbook.Sheets("Parameter").Cells(i, 4)
+        Set TargetColumnName = ThisWorkbook.Sheets("Parameter").Cells(i, 5)
+        If Not IsEmpty(TargetSheetName.Value) And Not IsEmpty(TargetColumnName.Value) Then
             Set destinationWorksheet = destinationWorkbook.Sheets(TargetSheetName.Value)
-            sourceResultColumn = FindColumnByKeyword(sourceWorkbook, "Parameter", SourceColumnName.Value)
-            DestinationResultColumn = FindColumnByKeyword(destinationWorkbook, TargetSheetName.Value, TargetColumnName.Value)
-            lastRowSource = sourceWorkbook.Cells(sourceWorksheet.Rows.Count, sourceResultColumn).End(xlUp).Row
-            for j=3 to lastRowSource
-                destinationWorksheet.Cells(j+1, DestinationResultColumn).Value = sourceWorksheet.Cells(j, sourceResultColumn).Value
+            sourceResultColumn = FindColumnByKeyword(sourceWorkbook, "Parameter", SourceColumnName.Value, 2)
+            DestinationResultColumn = FindColumnByKeyword(destinationWorkbook, TargetSheetName.Value, TargetColumnName.Value, 3)
+            lastRowSource = sourceWorksheet.Cells(sourceWorksheet.Rows.Count, sourceResultColumn).End(xlUp).Row
+            For j = 3 To lastRowSource
+                destinationWorksheet.Cells(j + 1, DestinationResultColumn).Value = sourceWorksheet.Cells(j, sourceResultColumn).Value
+            Next j
         End If
     Next i
     destinationWorkbook.Save
 End Sub
 
-Function FindColumnByKeyword(workbook As Workbook, sheetName As String, searchKey As String) As Long
+Function FindColumnByKeyword(Workbook As Workbook, sheetName As String, searchKey As String, headerRow As Long) As Long
     Dim ws As Worksheet
     Dim col As Range
     
     ' Check if the workbook is not nothing
-    If workbook Is Nothing Then
+    If Workbook Is Nothing Then
         MsgBox "Invalid workbook!"
         Exit Function
     End If
@@ -68,7 +72,7 @@ Function FindColumnByKeyword(workbook As Workbook, sheetName As String, searchKe
     
     ' Set the worksheet reference
     On Error Resume Next
-    Set ws = workbook.Sheets(sheetName)
+    Set ws = Workbook.Sheets(sheetName)
     On Error GoTo 0
     
     ' Check if the worksheet exists
@@ -78,7 +82,7 @@ Function FindColumnByKeyword(workbook As Workbook, sheetName As String, searchKe
     End If
     
     ' Search for the key in the second row
-    Set col = ws.Rows(2).Find(What:=searchKey, LookIn:=xlValues, LookAt:=xlWhole)
+    Set col = ws.Rows(headerRow).Find(What:=searchKey, LookIn:=xlValues, LookAt:=xlWhole)
     
     ' Check if the key is found
     If Not col Is Nothing Then
@@ -87,6 +91,7 @@ Function FindColumnByKeyword(workbook As Workbook, sheetName As String, searchKe
     Else
         ' Indicate that the key is not found
         FindColumnByKeyword = 0
-        MsgBox "Search key '" & searchKey & "' not found in the second row of sheet '" & sheetName & "'."
+        MsgBox "Search key '" & searchKey & "' not found in the '" & headerRow & "'row of sheet '" & sheetName & "'."
     End If
 End Function
+
