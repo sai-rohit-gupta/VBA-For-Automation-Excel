@@ -1,3 +1,5 @@
 VBA can be written anywhere and used in xlsx.
 https://stackoverflow.com/questions/23173694/is-it-possible-to-write-excel-vba-code-in-visual-studio
 
+Also the Link where chat gpt help is been taken history is here.
+https://chat.openai.com/share/01cbe731-635d-40fb-9d8d-f972eb135613
